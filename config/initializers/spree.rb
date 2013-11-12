@@ -1,0 +1,2 @@
+Spree::PermittedAttributes.checkout_attributes.push :campaign_source
+Spree::PermittedAttributes.line_item_attributes.push :campaign_tag
