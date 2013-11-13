@@ -1,6 +1,7 @@
 Spree::Core::Engine.routes.draw do
   namespace :admin do
-    resources :reports, :only => [:index, :show] do
+    resources :affiliate_codes
+    resources :reports, :only => [:index] do
       collection do
         get :affiliate_source_report
         post :affiliate_source_report
