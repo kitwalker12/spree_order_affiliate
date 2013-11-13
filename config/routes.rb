@@ -1,3 +1,5 @@
 Spree::Core::Engine.routes.draw do
-  # Add your extension routes here
+  namespace :admin do
+    get 'affiliate/reporting', action: 'reporting', controller: 'order_affiliate'
+  end
 end
