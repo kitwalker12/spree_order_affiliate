@@ -68,7 +68,7 @@ Spree::Admin::ReportsController.class_eval do
     end
     @line_items.each do |line_item|
       next if !line_item.order.complete? or @report[line_item.campaign_tag.to_sym].blank?
-      @report[line_item.campaign_tag.to_sym][:number] += 1
+      @report[line_item.campaign_tag.to_sym][:number] += line_item.quantity
       @report[line_item.campaign_tag.to_sym][:payable_order_value] += line_item.price
       @report[line_item.campaign_tag.to_sym][:commission] += (@report[line_item.campaign_tag.to_sym][:affiliate_code].rate * line_item.price)
     end

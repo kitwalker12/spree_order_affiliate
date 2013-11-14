@@ -6,7 +6,7 @@
 
 <% content_for :page_actions do %>
   <li><%= link_to_with_icon 'icon-edit', 'Edit', edit_admin_affiliate_code_path(@affiliate_code), :class => 'button' %></li>
-  <li><%= link_to_with_icon 'icon-file', 'Tag Report', tag_report_admin_affiliate_code_path(@affiliate_code), :class => 'button' %></li>
+  <li><%= link_to_with_icon 'icon-file', 'Source Report', admin_affiliate_code_path(@affiliate_code), :class => 'button' %></li>
 <% end %>
 
 <% content_for :table_filter_title do %>
@@ -14,7 +14,7 @@
 <% end %>
 
 <% content_for :table_filter do %>
-  <%= search_form_for @search, :url => admin_affiliate_code_path(@affiliate_code)  do |s| %>
+  <%= search_form_for @search, :url => post_tag_report_admin_affiliate_code_path(@affiliate_code)  do |s| %>
     <div class="date-range-filter field align-center">
         <%= label_tag nil, Spree.t(:start), :class => 'inline' %>
         <%= s.text_field :created_at_gt, :class => 'datepicker datepicker-from' %>
