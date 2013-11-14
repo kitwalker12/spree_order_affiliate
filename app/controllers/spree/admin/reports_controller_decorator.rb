@@ -17,6 +17,8 @@ Spree::Admin::ReportsController.class_eval do
     end
     if params[:q] && !params[:q][:created_at_lt].blank?
       params[:q][:created_at_lt] = Time.zone.parse(params[:q][:created_at_lt]).end_of_day rescue ""
+    else
+      params[:q][:created_at_lt] = Time.zone.now.end_of_day
     end
 
     params[:q][:completed_at_not_null] = '1'
@@ -49,6 +51,8 @@ Spree::Admin::ReportsController.class_eval do
     end
     if params[:q] && !params[:q][:created_at_lt].blank?
       params[:q][:created_at_lt] = Time.zone.parse(params[:q][:created_at_lt]).end_of_day rescue ""
+    else
+      params[:q][:created_at_lt] = Time.zone.now.end_of_day
     end
     params[:q][:campaign_tag_not_null] = '1'
     @search = Spree::LineItem.all.ransack(params[:q])
