@@ -1,0 +1,45 @@
+<% content_for :page_title do %>
+  <%= 'Affiliate Codes' %>
+<% end %>
+
+<% content_for :page_actions do %>
+  <%= form_for @affiliate_code, :url => admin_affiliate_codes_path do |f| %>
+      <%= f.label :code %>:
+      <%= f.text_field :code %>
+      <%= f.label :rate %>:
+      <%= f.text_field :rate %>
+      <%= f.submit %>
+  <% end %>
+<% end %>
+
+<% if @affiliate_codes.any? %>
+  <table class="index">
+    <colgroup>
+      <col style="width: 50%">
+      <col style="width: 50%">
+    </colgroup>
+    <thead>
+      <tr data-hook="affiliate_codes_header">
+        <th><%= 'Code' %></th>
+        <th><%= 'Rate' %></th>
+        <th class="actions"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @affiliate_codes.each do |affiliate_code|%>
+      <tr id="affiliate_codes" data-hook="affiliate_codes_row" class="<%= cycle('odd', 'even')%>">
+        <td class="align-center"><%= link_to affiliate_code.code, admin_affiliate_code_path(affiliate_code) %></td>
+        <td class="align-center"><%= affiliate_code.rate %></td>
+        <td class="actions">
+          <%= link_to_edit affiliate_code, :no_text => true %>
+          <%= link_to_delete affiliate_code, :no_text => true %>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <div class="alpha twelve columns no-objects-found">
+    <%= Spree.t(:no_resource_found, resource: I18n.t(:other, scope: 'activerecord.models.spree/tax_rate')) %>,
+  </div>
+<% end %>
