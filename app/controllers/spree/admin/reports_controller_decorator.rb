@@ -17,6 +17,8 @@ Spree::Admin::ReportsController.class_eval do
     end
     if params[:q] && !params[:q][:created_at_lt].blank?
       params[:q][:created_at_lt] = Time.zone.parse(params[:q][:created_at_lt]).end_of_day rescue ""
+    else
+      params[:q][:created_at_lt] = Time.zone.now.end_of_day
     end
 
     params[:q][:completed_at_not_null] = '1'
@@ -49,8 +51,11 @@ Spree::Admin::ReportsController.class_eval do
     end
     if params[:q] && !params[:q][:created_at_lt].blank?
       params[:q][:created_at_lt] = Time.zone.parse(params[:q][:created_at_lt]).end_of_day rescue ""
+    else
+      params[:q][:created_at_lt] = Time.zone.now.end_of_day
     end
     params[:q][:campaign_tag_not_null] = '1'
+
     @search = Spree::LineItem.all.ransack(params[:q])
     @line_items = @search.result
     @report = {}
@@ -64,7 +69,7 @@ Spree::Admin::ReportsController.class_eval do
     end
     @line_items.each do |line_item|
       next if !line_item.order.complete? or @report[line_item.campaign_tag.to_sym].blank?
-      @report[line_item.campaign_tag.to_sym][:number] += 1
+      @report[line_item.campaign_tag.to_sym][:number] += line_item.quantity
       @report[line_item.campaign_tag.to_sym][:payable_order_value] += line_item.price
       @report[line_item.campaign_tag.to_sym][:commission] += (@report[line_item.campaign_tag.to_sym][:affiliate_code].rate * line_item.price)
     end
