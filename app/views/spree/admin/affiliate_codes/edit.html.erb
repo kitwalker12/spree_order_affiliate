@@ -1,0 +1,11 @@
+<% content_for :page_title do %>
+  <%= 'Edit Affiliate Code' %>
+<% end %>
+
+<%= form_for @affiliate_code, :url => admin_affiliate_code_path(@affiliate_code) do |f| %>
+    <%= f.label :code %>:
+    <%= f.text_field :code %>
+    <%= f.label :rate %>:
+    <%= f.text_field :rate %>
+    <%= f.submit %>
+<% end %>
