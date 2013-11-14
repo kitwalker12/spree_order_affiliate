@@ -2,11 +2,45 @@ module Spree
   module Admin
     class AffiliateCodesController < Spree::Admin::ResourceController
 
-      before_filter :load_affiliate_code, :only => [:update, :edit, :show, :destroy, :tag_report]
+      before_filter :load_affiliate_code, :only => [:update, :edit, :show, :destroy, :tag_report, :sku_report]
 
       def index
         @affiliate_code = Spree::AffiliateCode.new
         @affiliate_codes = Spree::AffiliateCode.all
+      end
+
+      def sku_report
+        params[:q] = {} unless params[:q]
+        if params[:q][:created_at_gt].blank?
+          params[:q][:created_at_gt] = Time.zone.now.beginning_of_month
+        else
+          params[:q][:created_at_gt] = Time.zone.parse(params[:q][:created_at_gt]).beginning_of_day rescue Time.zone.now.beginning_of_month
+        end
+        if params[:q] && !params[:q][:created_at_lt].blank?
+          params[:q][:created_at_lt] = Time.zone.parse(params[:q][:created_at_lt]).end_of_day rescue ""
+        else
+          params[:q][:created_at_lt] = Time.zone.now.end_of_day
+        end
+        params[:q][:campaign_tag_eq] = @affiliate_code.code
+
+        @search = Spree::LineItem.all.ransack(params[:q])
+        @line_items = @search.result
+        @report = {}
+
+        @line_items.each do |line_item|
+          next if !line_item.order.complete?
+          key = line_item.variant.sku
+          @report[key] = {
+            :price => 0,
+            :quantity => 0,
+            :total => 0,
+            :commission => 0
+          }
+          @report[key][:price] = line_item.price
+          @report[key][:quantity] += line_item.quantity
+          @report[key][:total] += line_item.price
+          @report[key][:commission] += (@affiliate_code.rate * line_item.price)
+        end
       end
 
       def tag_report

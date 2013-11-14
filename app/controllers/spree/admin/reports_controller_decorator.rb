@@ -55,6 +55,7 @@ Spree::Admin::ReportsController.class_eval do
       params[:q][:created_at_lt] = Time.zone.now.end_of_day
     end
     params[:q][:campaign_tag_not_null] = '1'
+
     @search = Spree::LineItem.all.ransack(params[:q])
     @line_items = @search.result
     @report = {}

@@ -7,7 +7,7 @@
 <% content_for :page_actions do %>
   <li><%= link_to_with_icon 'icon-edit', 'Edit', edit_admin_affiliate_code_path(@affiliate_code), :class => 'button' %></li>
   <li><%= link_to_with_icon 'icon-file', 'Source Report', admin_affiliate_code_path(@affiliate_code), :class => 'button' %></li>
-  <li><%= link_to_with_icon 'icon-file', 'SKU Report', sku_report_admin_affiliate_code_path(@affiliate_code), :class => 'button' %></li>
+  <li><%= link_to_with_icon 'icon-file', 'Tag Report', tag_report_admin_affiliate_code_path(@affiliate_code), :class => 'button' %></li>
 <% end %>
 
 <% content_for :table_filter_title do %>
@@ -15,7 +15,7 @@
 <% end %>
 
 <% content_for :table_filter do %>
-  <%= search_form_for @search, :url => post_tag_report_admin_affiliate_code_path(@affiliate_code)  do |s| %>
+  <%= search_form_for @search, :url => post_sku_report_admin_affiliate_code_path(@affiliate_code)  do |s| %>
     <div class="date-range-filter field align-center">
         <%= label_tag nil, Spree.t(:start), :class => 'inline' %>
         <%= s.text_field :created_at_gt, :class => 'datepicker datepicker-from' %>
@@ -37,9 +37,10 @@
 <table class="admin-report" data-hook="affiliate_total">
   <thead>
     <tr>
-      <th>Date</th>
-      <th>Products Sold</th>
-      <th>Payable Order Value</th>
+      <th>SKU</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
       <th>Commission</th>
     </tr>
   </thead>
@@ -47,8 +48,9 @@
     <% @report.each do |key, value| %>
     <tbody>
       <td><%= key %></td>
-      <td><%= value[:product_sold] %></td>
-      <td><%= value[:payable_order_value] %></td>
+      <td><%= value[:price] %></td>
+      <td><%= value[:quantity] %></td>
+      <td><%= value[:total] %></td>
       <td><%= value[:commission] %></td>
     </tbody>
     <% end %>
@@ -56,3 +58,4 @@
     No Codes Available
   <% end %>
 </table>
+
