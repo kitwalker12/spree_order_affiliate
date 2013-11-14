@@ -5,34 +5,68 @@ Spree::Admin::ReportsController.class_eval do
   }
 
   def index
-    @reports = AVAILABLE_REPORTS.merge(NEW_REPORTS)
+    @reports = Spree::Admin::ReportsController::AVAILABLE_REPORTS.merge(NEW_REPORTS)
   end
 
   def affiliate_source_report
-    params[:q] ||= {}
-    params[:q][:completed_at_not_null] ||= '1'
-    @show_only_completed = true
-    params[:q][:s] ||= 'completed_at desc'
-    created_at_gt = params[:q][:created_at_gt]
-    created_at_lt = params[:q][:created_at_lt]
-    if !params[:q][:created_at_gt].blank?
-      params[:q][:created_at_gt] = Time.zone.parse(params[:q][:created_at_gt]).beginning_of_day rescue ""
+    params[:q] = {} unless params[:q]
+    if params[:q][:created_at_gt].blank?
+      params[:q][:created_at_gt] = Time.zone.now.beginning_of_month
+    else
+      params[:q][:created_at_gt] = Time.zone.parse(params[:q][:created_at_gt]).beginning_of_day rescue Time.zone.now.beginning_of_month
     end
-
-    if !params[:q][:created_at_lt].blank?
+    if params[:q] && !params[:q][:created_at_lt].blank?
       params[:q][:created_at_lt] = Time.zone.parse(params[:q][:created_at_lt]).end_of_day rescue ""
     end
 
-    if @show_only_completed
-      params[:q][:completed_at_gt] = params[:q].delete(:created_at_gt)
-      params[:q][:completed_at_lt] = params[:q].delete(:created_at_lt)
+    params[:q][:completed_at_not_null] = '1'
+    params[:q][:campaign_source_not_null] = '1'
+    @search = Spree::Order.all.ransack(params[:q])
+    @orders = @search.result
+    @report = {}
+    Spree::AffiliateCode.all.each do |affiliate_code|
+      @report[affiliate_code.code.to_sym] = {
+        :affiliate_code => affiliate_code,
+        :number => 0,
+        :payable_order_value => 0,
+        :commission => 0
+      }
     end
-    @search = Spree::Order.accessible_by(current_ability, :index).ransack(params[:q])
-    @orders = @search.result.includes([:user, :shipments, :payments]).
-      page(params[:page]).
-      per(params[:per_page] || 20)
+    @orders.each do |order|
+      next if @report[order.campaign_source.to_sym].blank?
+      @report[order.campaign_source.to_sym][:number] += 1
+      @report[order.campaign_source.to_sym][:payable_order_value] += order.item_total
+      @report[order.campaign_source.to_sym][:commission] += (@report[order.campaign_source.to_sym][:affiliate_code].rate * order.item_total)
+    end
   end
 
   def affiliate_tag_report
+    params[:q] = {} unless params[:q]
+    if params[:q][:created_at_gt].blank?
+      params[:q][:created_at_gt] = Time.zone.now.beginning_of_month
+    else
+      params[:q][:created_at_gt] = Time.zone.parse(params[:q][:created_at_gt]).beginning_of_day rescue Time.zone.now.beginning_of_month
+    end
+    if params[:q] && !params[:q][:created_at_lt].blank?
+      params[:q][:created_at_lt] = Time.zone.parse(params[:q][:created_at_lt]).end_of_day rescue ""
+    end
+    params[:q][:campaign_tag_not_null] = '1'
+    @search = Spree::LineItem.all.ransack(params[:q])
+    @line_items = @search.result
+    @report = {}
+    Spree::AffiliateCode.all.each do |affiliate_code|
+      @report[affiliate_code.code.to_sym] = {
+        :affiliate_code => affiliate_code,
+        :number => 0,
+        :payable_order_value => 0,
+        :commission => 0
+      }
+    end
+    @line_items.each do |line_item|
+      next if !line_item.order.complete? or @report[line_item.campaign_tag.to_sym].blank?
+      @report[line_item.campaign_tag.to_sym][:number] += 1
+      @report[line_item.campaign_tag.to_sym][:payable_order_value] += line_item.price
+      @report[line_item.campaign_tag.to_sym][:commission] += (@report[line_item.campaign_tag.to_sym][:affiliate_code].rate * line_item.price)
+    end
   end
 end

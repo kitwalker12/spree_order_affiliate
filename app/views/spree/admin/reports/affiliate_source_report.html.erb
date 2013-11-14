@@ -3,55 +3,52 @@
 <% end %>
 
 <% content_for :page_actions do %>
-  <li>
-    <!-- Space for Page Action Links -->
-  </li>
+  <li><%= link_to_with_icon 'icon-arrow-left', Spree.t(:back_to_reports_list), spree.admin_reports_url, :class => 'button' %></li>
 <% end %>
 
-<%= paginate @orders %>
+<% content_for :table_filter_title do %>
+  <%= Spree.t(:date_range) %>
+<% end %>
 
-<% if @orders.any? %>
-  <table class="index responsive" id="listing_orders" data-hook>
-    <colgroup>
-       <col style="width: 13%;">
-       <col style="width: 10%;">
-       <col style="width: 10%;">
-       <col style="width: 12%;">
-       <col style="width: 12%;">
-       <col style="width: 25%;">
-       <col style="width: 10%;">
-       <col style="width: 8%;">
-    </colgroup>
-    <thead>
-      <tr data-hook="admin_orders_index_headers">
-        <th><%= sort_link @search, :completed_at, I18n.t(:completed_at, :scope => 'activerecord.attributes.spree/order') %></th>
-        <th><%= sort_link @search, :number,         I18n.t(:number, :scope => 'activerecord.attributes.spree/order') %></th>
-        <th><%= sort_link @search, :state,          I18n.t(:state, :scope => 'activerecord.attributes.spree/order') %></th>
-        <th><%= sort_link @search, :payment_state,  I18n.t(:payment_state, :scope => 'activerecord.attributes.spree/order') %></th>
-        <th><%= sort_link @search, :shipment_state, I18n.t(:shipment_state, :scope => 'activerecord.attributes.spree/order') %></th>
-        <th><%= sort_link @search, :email,          I18n.t(:email, :scope => 'activerecord.attributes.spree/order') %></th>
-        <th><%= sort_link @search, :total,          I18n.t(:total, :scope => 'activerecord.attributes.spree/order') %></th>
-        <th data-hook="admin_orders_index_header_actions" class="actions"></th>
-      </tr>
-    </thead>
+<% content_for :table_filter do %>
+  <%= search_form_for @search, :url => spree.affiliate_source_report_admin_reports_path  do |s| %>
+    <div class="date-range-filter field align-center">
+        <%= label_tag nil, Spree.t(:start), :class => 'inline' %>
+        <%= s.text_field :created_at_gt, :class => 'datepicker datepicker-from' %>
+
+        <span class="range-divider">
+          <i class="icon-arrow-right"></i>
+        </span>
+
+        <%= s.text_field :created_at_lt, :class => 'datepicker datepicker-to' %>
+        <%= label_tag nil, Spree.t(:end), :class => 'inline' %>
+    </div>
+
+    <div class="actions filter-actions">
+      <%= button Spree.t(:search), 'icon-search'  %>
+    </div>
+  <% end %>
+<% end %>
+
+<table class="admin-report" data-hook="affiliate_total">
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Number</th>
+      <th>Payable Order Value</th>
+      <th>Commission</th>
+    </tr>
+  </thead>
+  <% if !@report.blank? %>
+    <% @report.each do |key, value| %>
     <tbody>
-    <% @orders.each do |order| %>
-      <tr data-hook="admin_orders_index_rows" class="state-<%= order.state.downcase %> <%= cycle('odd', 'even') %>">
-        <td class="align-center"><%= l (@show_only_completed ? order.completed_at : order.created_at).to_date %></td>
-        <td class="align-center"><%= link_to order.number, edit_admin_order_path(order) %></td>
-        <td class="align-center"><span class="state <%= order.state.downcase %>"><%= Spree.t("order_state.#{order.state.downcase}") %></span></td>
-        <td class="align-center"><span class="state <%= order.payment_state %>"><%= link_to Spree.t("payment_states.#{order.payment_state}"), admin_order_payments_path(order) if order.payment_state %></span></td>
-        <td class="align-center"><span class="state <%= order.shipment_state %>"><%= Spree.t("shipment_states.#{order.shipment_state}") if order.shipment_state %></span></td>
-        <td><%= order.email %></td>
-        <td class="align-center"><%= order.display_total.to_html %></td>
-      </tr>
-    <% end %>
+      <td><%= key %></td>
+      <td><%= value[:number] %></td>
+      <td><%= value[:payable_order_value] %></td>
+      <td><%= value[:commission] %></td>
     </tbody>
-  </table>
-<% else %>
-  <div class="alpha twelve columns no-objects-found">
-    <%= Spree.t(:no_resource_found, resource: I18n.t(:other, scope: 'activerecord.models.spree/order')) %>,
-  </div>
-<% end %>
-
-<%= paginate @orders %>
+    <% end %>
+  <% else %>
+    No Codes Available
+  <% end %>
+</table>
