@@ -42,7 +42,7 @@
   <% if !@report.blank? %>
     <% @report.each do |key, value| %>
     <tbody>
-      <td><%= key %></td>
+      <td><%= link_to key, tag_report_admin_affiliate_code_path(value[:affiliate_code], params) %></td>
       <td><%= value[:number] %></td>
       <td><%= value[:payable_order_value] %></td>
       <td><%= value[:commission] %></td>
